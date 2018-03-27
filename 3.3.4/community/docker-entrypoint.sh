@@ -197,9 +197,9 @@ else
 fi
 
 echo "Copying config and plugins"
-cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* /var/lib/neo4j/conf/
+cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* /conf/
 mkdir /var/plugins
-cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* /var/plugins/
+cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* /plugins/
 
 
 
