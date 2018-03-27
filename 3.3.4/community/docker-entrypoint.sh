@@ -106,7 +106,7 @@ fi
 : ${NEO4J_causal__clustering_raft__advertised__address:=${NEO4J_causalClustering_raftAdvertisedAddress:-"$(hostname):7000"}}
 
 : ${NEO4J_dbms_connectors_default__listen__address:="0.0.0.0"}
-: ${NEO4J_dbms_connector_http_listen__address:="0.0.0.0:7474"}
+: ${NEO4J_dbms_connector_http_listen__address:="0.0.0.0:7475"}
 : ${NEO4J_dbms_connector_https_listen__address:="0.0.0.0:7473"}
 : ${NEO4J_dbms_connector_bolt_listen__address:="0.0.0.0:7687"}
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
