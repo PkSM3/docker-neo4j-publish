@@ -112,6 +112,9 @@ fi
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
 : ${NEO4J_ha_host_data:="$(hostname):6001"}
 : ${NEO4J_dbms_security_auth__enabled:="false"}
+: ${NEO4J_causal__clustering_transaction__advertised__address:="$(hostname):7687"}}
+
+
 
 # unset old hardcoded unsupported env variables
 unset NEO4J_dbms_txLog_rotation_retentionPolicy NEO4J_UDC_SOURCE \
