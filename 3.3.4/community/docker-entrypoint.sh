@@ -111,6 +111,7 @@ fi
 : ${NEO4J_dbms_connector_bolt_listen__address:="0.0.0.0:7687"}
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
 : ${NEO4J_ha_host_data:="$(hostname):6001"}
+: ${NEO4J_dbms_security_auth__enabled:="false"}
 
 # unset old hardcoded unsupported env variables
 unset NEO4J_dbms_txLog_rotation_retentionPolicy NEO4J_UDC_SOURCE \
