@@ -112,7 +112,7 @@ fi
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
 : ${NEO4J_ha_host_data:="$(hostname):6001"}
 : ${NEO4J_dbms_security_auth__enabled:="false"}
-: ${NEO4J_dbms_connector_bolt_advertised__address:="neo4j-bolt-myproject.192.168.99.100.nip.io:7687"}
+: ${NEO4J_dbms_connector_bolt_advertised__address:="neo4j-bolt-myproject.192.168.99.100.nip.io"}
 
 
 
