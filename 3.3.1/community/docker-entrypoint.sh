@@ -2,25 +2,58 @@
 
 cmd="$1"
 
-if [[ "${cmd}" != *"neo4j"* ]]; then
-    [ -f "${EXTENSION_SCRIPT:-}" ] && . ${EXTENSION_SCRIPT}
+# If we're running as root, then run as the neo4j user. Otherwise
+# docker is running with --user and we simply use that user.  Note
+# that su-exec, despite its name, does not replicate the functionality
+# of exec, so we need to use both
+if [ "$(id -u)" = "0" ]; then
+  userid="neo4j"
+  groupid="neo4j"
+  exec_cmd="exec su-exec neo4j"
+else
+  userid="$(id -u)"
+  groupid="$(id -g)"
+  exec_cmd="exec"
+fi
+readonly userid
+readonly groupid
+readonly exec_cmd
 
-    if [ "${cmd}" == "dump-config" ]; then
-        if [ -d /conf ]; then
-            cp --recursive conf/* /conf
-            exit 0
-        else
-            echo "You must provide a /conf volume"
-            exit 1
-        fi
-    fi
-    exec "$@"
-    exit $?
+# Need to chown the home directory - but a user might have mounted a
+# volume here (notably a conf volume). So take care not to chown
+# volumes (stuff not owned by neo4j)
+if [[ "$(id -u)" = "0" ]]; then
+  # Non-recursive chown for the base directory
+  chown "${userid}":"${groupid}" /var/lib/neo4j
+  chmod 700 /var/lib/neo4j
 fi
 
-if [ "$NEO4J_EDITION" == "enterprise" ]; then
+while IFS= read -r -d '' dir
+do
+  if [[ "$(id -u)" = "0" ]] && [[ "$(stat -c %U "${dir}")" = "neo4j" ]]; then
+    # Using mindepth 1 to avoid the base directory here so recursive is OK
+    chown -R "${userid}":"${groupid}" "${dir}"
+    chmod -R 700 "${dir}"
+  fi
+done <   <(find /var/lib/neo4j -type d -mindepth 1 -maxdepth 1 -print0)
+
+# Data dir is chowned later
+
+if [[ "${cmd}" != *"neo4j"* ]]; then
+  if [ "${cmd}" == "dump-config" ]; then
+    if [ -d /conf ]; then
+      ${exec_cmd} cp --recursive conf/* /conf
+      exit 0
+    else
+      echo >&2 "You must provide a /conf volume"
+      exit 1
+    fi
+  fi
+else
+  # Only prompt for license agreement if command contains "neo4j" in it
+  if [ "$NEO4J_EDITION" == "enterprise" ]; then
     if [ "${NEO4J_ACCEPT_LICENSE_AGREEMENT:=no}" != "yes" ]; then
-        echo "
+      echo >&2 "
 In order to use Neo4j Enterprise Edition you must accept the license agreement.
 
 (c) Network Engine for Objects in Lund AB.  2017.  All Rights Reserved.
@@ -32,15 +65,16 @@ Email inquiries can be directed to: licensing@neo4j.com
 More information is also available at: https://neo4j.com/licensing/
 
 
-To accept the license agreemnt set the environment variable
+To accept the license agreement set the environment variable
 NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
 
 To do this you can use the following docker argument:
 
         --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
 "
-        exit 1
+      exit 1
     fi
+  fi
 fi
 
 # Env variable naming convention:
@@ -80,6 +114,9 @@ fi
 : ${NEO4J_dbms_security_auth__enabled:="false"}
 : ${NEO4J_dbms_connector_bolt_advertised__address:="$(hostname):7687"}
 : ${NEO4J_dbms_active__database:="graph.db"}
+: ${NEO4J_dbms_security_procedures_unrestricted:="apoc.*,algo.*,ga.*"}
+: ${NEO4J_dbms_security_procedures_whitelist:="apoc.*,algo.*,ga.*"}
+: ${NEO4J_apoc_export_file_enabled:="true"}
 
 
 #: ${NEO4J_dbms_security_auth__enabled:="false"}
@@ -136,6 +173,7 @@ fi
 #  com.graphaware.module.ES.relationship=(true)
 #  com.graphaware.runtime.stats.disabled=true
 #  com.graphaware.server.stats.disabled=true
+
 
 
 # unset old hardcoded unsupported env variables
@@ -195,40 +233,6 @@ if [ -d /metrics ]; then
     NEO4J_dbms_directories_metrics="/metrics"
 fi
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # DOWNLOAD: PANAMA PAPERS # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-# DATA_FILE="panama-papers-mac-2016-06-27.tar.gz"
-# if [ ! -f "./$DATA_FILE" ]; then
-#   echo "Downloading data"
-#   wget "https://cloudfront-files-1.publicintegrity.org/offshoreleaks/neo4j/$DATA_FILE"
-# else
-#   echo "Not downloading data as file already exists"
-# fi
-
-# if [ ! -d "./panama-papers" ]; then
-#   tar -zxvf "$DATA_FILE"
-# fi
-
-# if [ ! -d "/data/databases/panama.graphdb" ]; then
-#   echo "Copying data over to databases directory"
-#   cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/databases /data/
-# else
-#   echo "Skipping copying data over to databases directory as panama.graphdb already exists"
-# fi
-
-# echo "Copying config and plugins"
-# cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* conf/
-# cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* plugins/
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-
-
 # set the neo4j initial password only if you run the database server
 if [ "${cmd}" == "neo4j" ]; then
     if [ "${NEO4J_AUTH:-}" == "none" ]; then
@@ -236,13 +240,13 @@ if [ "${cmd}" == "neo4j" ]; then
     elif [[ "${NEO4J_AUTH:-}" == neo4j/* ]]; then
         password="${NEO4J_AUTH#neo4j/}"
         if [ "${password}" == "neo4j" ]; then
-            echo "Invalid value for password. It cannot be 'neo4j', which is the default."
+            echo >&2 "Invalid value for password. It cannot be 'neo4j', which is the default."
             exit 1
         fi
         # Will exit with error if users already exist (and print a message explaining that)
         bin/neo4j-admin set-initial-password "${password}" || true
     elif [ -n "${NEO4J_AUTH:-}" ]; then
-        echo "Invalid value for NEO4J_AUTH: '${NEO4J_AUTH}'"
+        echo >&2 "Invalid value for NEO4J_AUTH: '${NEO4J_AUTH}'"
         exit 1
     fi
 fi
@@ -262,10 +266,20 @@ for i in $( set | grep ^NEO4J_ | awk -F'=' '{print $1}' | sort -rn ); do
     fi
 done
 
+# Chown the data dir now that (maybe) an initial password has been
+# set (this is a file in the data dir)
+if [[ "$(id -u)" = "0" ]]; then
+  chmod -R 755 /data
+  chown -R "${userid}":"${groupid}" /data
+fi
+
 [ -f "${EXTENSION_SCRIPT:-}" ] && . ${EXTENSION_SCRIPT}
 
+# Use su-exec to drop privileges to neo4j user
+# Note that su-exec, despite its name, does not replicate the
+# functionality of exec, so we need to use both
 if [ "${cmd}" == "neo4j" ]; then
-    exec neo4j console
+  ${exec_cmd} neo4j console
 else
-    exec "$@"
+  ${exec_cmd} "$@"
 fi
