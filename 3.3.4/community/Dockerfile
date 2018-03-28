@@ -34,13 +34,10 @@ WORKDIR /var/lib/neo4j
 VOLUME /data
 
 
-
-
-
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 
-EXPOSE 7475 7473 7687
+EXPOSE 7474 7473 7687
 
 ENTRYPOINT ["/sbin/tini", "-g", "--", "/docker-entrypoint.sh"]
 CMD ["neo4j"]

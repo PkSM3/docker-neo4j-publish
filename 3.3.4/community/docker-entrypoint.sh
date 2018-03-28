@@ -106,7 +106,7 @@ fi
 : ${NEO4J_causal__clustering_raft__advertised__address:=${NEO4J_causalClustering_raftAdvertisedAddress:-"$(hostname):7000"}}
 
 : ${NEO4J_dbms_connectors_default__listen__address:="0.0.0.0"}
-: ${NEO4J_dbms_connector_http_listen__address:="0.0.0.0:7475"}
+: ${NEO4J_dbms_connector_http_listen__address:="0.0.0.0:7474"}
 : ${NEO4J_dbms_connector_https_listen__address:="0.0.0.0:7473"}
 : ${NEO4J_dbms_connector_bolt_listen__address:="0.0.0.0:7687"}
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
@@ -114,6 +114,62 @@ fi
 : ${NEO4J_dbms_security_auth__enabled:="false"}
 : ${NEO4J_dbms_connector_bolt_advertised__address:="$(hostname):7687"}
 : ${NEO4J_dbms_active__database:="panama.graphdb"}
+
+
+#: ${NEO4J_dbms_security_auth__enabled:="false"}
+#: ${NEO4J_dbms_connector_bolt_advertised__address:="$(hostname):7687"}
+#: ${NEO4J_dbms_active__database:="panama.graphdb"}
+
+#: ${NEO4J_dbms_directories_import:="import"}
+#: ${NEO4J_dbms_security_allow__csv__import__from__file__urls:="true"}
+#: ${NEO4J_dbms_allow__upgrade:="true"}
+
+#: ${NEO4J_dbms_security_procedures_unrestricted:="apoc.*,algo.*,ga.*"}
+#: ${NEO4J_dbms_security_procedures_whitelist:="apoc.*,algo.*,ga.*"}
+#: ${NEO4J_apoc_export_file_enabled:="true"}
+
+#: ${NEO4J_com_graphaware_runtime_enabled:="true"}
+#: ${NEO4J_com_graphaware_module_ES_1:="com.graphaware.module.es.ElasticSearchModuleBootstrapper"}
+#: ${NEO4J_com_graphaware_module_ES_uri:="127-0-0-1"}
+#: ${NEO4J_com_graphaware_module_ES_port:="9200"}
+#: ${NEO4J_com_graphaware_module_ES_mapping:="AdvancedMapping"}
+#: ${NEO4J_com_graphaware_module_ES_keyProperty:="ID()"}
+#: ${NEO4J_com_graphaware_module_ES_retryOnError:="true"}
+#: ${NEO4J_com_graphaware_module_ES_asyncIndexation:="true"}
+#: ${NEO4J_com_graphaware_module_ES_initializeUntil:="2000000000000"}
+#  # Set "relationship" to "(false)" to disable relationships (edges) indexation
+#  # Disabling relationship indexation is recommended if you have a lot of relationships and don't need to search them_ 
+#: ${NEO4J_com_graphaware_module_ES_relationship:="(true)"}
+#: ${NEO4J_com_graphaware_runtime_stats_disabled:="true"}
+#: ${NEO4J_com_graphaware_server_stats_disabled:="true"}
+
+
+#  dbms.security.auth_enabled=false
+#  dbms.connector.bolt.advertised_address:=$(hostname):7687
+
+#  dbms.active_database=panama.graphdb
+#  dbms.directories.import=import
+#  dbms.security.allow_csv_import_from_file_urls=true
+#  dbms.allow_upgrade=true
+
+#  dbms.security.procedures.unrestricted=apoc.*,algo.*,ga.*
+#  dbms.security.procedures.whitelist=apoc.*,algo.*,ga.*
+#  apoc.export.file.enabled=true
+
+#  com.graphaware.runtime.enabled=true
+#  com.graphaware.module.ES.1=com.graphaware.module.es.ElasticSearchModuleBootstrapper
+#  com.graphaware.module.ES.uri=127-0-0-1
+#  com.graphaware.module.ES.port=9200
+#  com.graphaware.module.ES.mapping=AdvancedMapping
+#  com.graphaware.module.ES.keyProperty=ID()
+#  com.graphaware.module.ES.retryOnError=true
+#  com.graphaware.module.ES.asyncIndexation=true
+#  com.graphaware.module.ES.initializeUntil=2000000000000
+#  # Set "relationship" to "(false)" to disable relationships (edges) indexation. 
+#  # Disabling relationship indexation is recommended if you have a lot of relationships and don't need to search them. 
+#  com.graphaware.module.ES.relationship=(true)
+#  com.graphaware.runtime.stats.disabled=true
+#  com.graphaware.server.stats.disabled=true
 
 
 
@@ -176,6 +232,9 @@ fi
 
 
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # Downloading Panama Papers # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 DATA_FILE="panama-papers-mac-2016-06-27.tar.gz"
 if [ ! -f "./$DATA_FILE" ]; then
@@ -199,6 +258,10 @@ fi
 echo "Copying config and plugins"
 cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* conf/
 cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* plugins/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 
 

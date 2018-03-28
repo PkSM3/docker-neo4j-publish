@@ -77,6 +77,12 @@ fi
 : ${NEO4J_dbms_connector_bolt_listen__address:="0.0.0.0:7687"}
 : ${NEO4J_ha_host_coordination:="$(hostname):5001"}
 : ${NEO4J_ha_host_data:="$(hostname):6001"}
+: ${NEO4J_dbms_security_auth__enabled:="false"}
+: ${NEO4J_dbms_connector_bolt_advertised__address:="$(hostname):7687"}
+: ${NEO4J_dbms_active__database:="panama.graphdb"}
+: ${NEO4J_dbms_security_procedures_unrestricted:="apoc.*,algo.*,ga.*"}
+: ${NEO4J_dbms_security_procedures_whitelist:="apoc.*,algo.*,ga.*"}
+: ${NEO4J_apoc_export_file_enabled:="true"}
 
 # unset old hardcoded unsupported env variables
 unset NEO4J_dbms_txLog_rotation_retentionPolicy NEO4J_UDC_SOURCE \
@@ -134,6 +140,38 @@ fi
 if [ -d /metrics ]; then
     NEO4J_dbms_directories_metrics="/metrics"
 fi
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # DOWNLOAD: PANAMA PAPERS # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+DATA_FILE="panama-papers-mac-2016-06-27.tar.gz"
+if [ ! -f "./$DATA_FILE" ]; then
+  echo "Downloading data"
+  wget "https://cloudfront-files-1.publicintegrity.org/offshoreleaks/neo4j/$DATA_FILE"
+else
+  echo "Not downloading data as file already exists"
+fi
+
+if [ ! -d "./panama-papers" ]; then
+  tar -zxvf "$DATA_FILE"
+fi
+
+if [ ! -d "/data/databases/panama.graphdb" ]; then
+  echo "Copying data over to databases directory"
+  cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/databases /data/
+else
+  echo "Skipping copying data over to databases directory as panama.graphdb already exists"
+fi
+
+echo "Copying config and plugins"
+cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* conf/
+cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* plugins/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # set the neo4j initial password only if you run the database server
 if [ "${cmd}" == "neo4j" ]; then
