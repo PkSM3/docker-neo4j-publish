@@ -79,7 +79,7 @@ fi
 : ${NEO4J_ha_host_data:="$(hostname):6001"}
 : ${NEO4J_dbms_security_auth__enabled:="false"}
 : ${NEO4J_dbms_connector_bolt_advertised__address:="$(hostname):7687"}
-: ${NEO4J_dbms_active__database:="panama.graphdb"}
+: ${NEO4J_dbms_active__database:="graph.db"}
 : ${NEO4J_dbms_security_procedures_unrestricted:="apoc.*,algo.*,ga.*"}
 : ${NEO4J_dbms_security_procedures_whitelist:="apoc.*,algo.*,ga.*"}
 : ${NEO4J_apoc_export_file_enabled:="true"}
@@ -141,37 +141,65 @@ if [ -d /metrics ]; then
     NEO4J_dbms_directories_metrics="/metrics"
 fi
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # DOWNLOAD: MOVIES DB # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+
+GUSER="https://github.com/PkSM3"
+GREPO="neo4j-3.3.1_moviesdb"
+GBRANCH="master"
+GFILE=$GREPO"-"$GBRANCH".tar.gz"
+GURL=$GUSER"/"$GREPO"/archive/"$GBRANCH".tar.gz"
+DATA_FILE=$GBRANCH".tar.gz"
+DATA_FOLDER="master"
+
+rm -R "$DATA_FOLDER" $GBRANCH".tar.gz" $GREPO"-"$GBRANCH
+
+
+wget "$GURL"
+tar -zxvf "$DATA_FILE"
+echo "Copying files"
+
+cp -R ./$GREPO"-"$GBRANCH/databases "data/graph.db"
+cp -R ./$GREPO"-"$GBRANCH/plugins/* "plugins/"
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # DOWNLOAD: PANAMA PAPERS # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-DATA_FILE="panama-papers-mac-2016-06-27.tar.gz"
-if [ ! -f "./$DATA_FILE" ]; then
-  echo "Downloading data"
-  wget "https://cloudfront-files-1.publicintegrity.org/offshoreleaks/neo4j/$DATA_FILE"
-else
-  echo "Not downloading data as file already exists"
-fi
+# DATA_FILE="panama-papers-mac-2016-06-27.tar.gz"
+# if [ ! -f "./$DATA_FILE" ]; then
+#   echo "Downloading data"
+#   wget "https://cloudfront-files-1.publicintegrity.org/offshoreleaks/neo4j/$DATA_FILE"
+# else
+#   echo "Not downloading data as file already exists"
+# fi
 
-if [ ! -d "./panama-papers" ]; then
-  tar -zxvf "$DATA_FILE"
-fi
+# if [ ! -d "./panama-papers" ]; then
+#   tar -zxvf "$DATA_FILE"
+# fi
 
-if [ ! -d "/data/databases/panama.graphdb" ]; then
-  echo "Copying data over to databases directory"
-  cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/databases /data/
-else
-  echo "Skipping copying data over to databases directory as panama.graphdb already exists"
-fi
+# if [ ! -d "/data/databases/panama.graphdb" ]; then
+#   echo "Copying data over to databases directory"
+#   cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/databases /data/
+# else
+#   echo "Skipping copying data over to databases directory as panama.graphdb already exists"
+# fi
 
-echo "Copying config and plugins"
-cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* conf/
-cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* plugins/
+# echo "Copying config and plugins"
+# cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/conf/* conf/
+# cp -R ./panama-papers/ICIJ\ Panama\ Papers/panama_data_for_neo4j/plugins/* plugins/
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+
 
 # set the neo4j initial password only if you run the database server
 if [ "${cmd}" == "neo4j" ]; then
