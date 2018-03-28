@@ -213,13 +213,16 @@ DATA_FOLDER="master"
 
 #rm -R "$DATA_FOLDER" $GBRANCH".tar.gz" $GREPO"-"$GBRANCH
 
-
+echo "Downloading..."
 wget "$GURL"
+echo "Downloading... OK"
+echo "Uncompressing..."
 tar -zxvf "$DATA_FILE"
-echo "Copying files"
-
+echo "Uncompressing... OK"
+echo "Copying files..."
 cp -R ./$GREPO"-"$GBRANCH/databases "data/graph.db"
 cp -R ./$GREPO"-"$GBRANCH/plugins/* "plugins/"
+echo "Copying files... OK"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
