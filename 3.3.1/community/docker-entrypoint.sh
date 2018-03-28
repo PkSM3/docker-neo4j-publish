@@ -211,7 +211,7 @@ GURL=$GUSER"/"$GREPO"/archive/"$GBRANCH".tar.gz"
 DATA_FILE=$GBRANCH".tar.gz"
 DATA_FOLDER="master"
 
-rm -R "$DATA_FOLDER" $GBRANCH".tar.gz" $GREPO"-"$GBRANCH
+#rm -R "$DATA_FOLDER" $GBRANCH".tar.gz" $GREPO"-"$GBRANCH
 
 
 wget "$GURL"
