@@ -203,26 +203,18 @@ fi
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 
-GUSER="https://github.com/PkSM3"
-GREPO="neo4j-3.3.1_moviesdb"
-GBRANCH="master"
-GFILE=$GREPO"-"$GBRANCH".tar.gz"
-GURL=$GUSER"/"$GREPO"/archive/"$GBRANCH".tar.gz"
-DATA_FILE=$GBRANCH".tar.gz"
-DATA_FOLDER="master"
-
-#rm -R "$DATA_FOLDER" $GBRANCH".tar.gz" $GREPO"-"$GBRANCH
-
 echo "Downloading..."
-wget "$GURL"
-echo "Downloading... OK"
+wget "http://example-data.neo4j.org/3.0-datasets/cineasts.tgz"
+wget "https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.3.0.1/apoc-3.3.0.1-all.jar"
+wget "https://github.com/neo4j-contrib/neo4j-graph-algorithms/releases/download/3.3.0.0/graph-algorithms-algo-3.3.0.0.jar"
+wget "https://products.graphaware.com/download/framework-server-community/graphaware-server-community-all-3.3.1.51.jar"
+wget "https://products.graphaware.com/download/neo4j-to-elasticsearch/graphaware-neo4j-to-elasticsearch-3.3.1.51.7.jar"
+echo "Downloading: OK"
 echo "Uncompressing..."
-tar -zxvf "$DATA_FILE"
-echo "Uncompressing... OK"
-echo "Copying files..."
-cp -R ./$GREPO"-"$GBRANCH/databases "data/graph.db"
-cp -R ./$GREPO"-"$GBRANCH/plugins/* "plugins/"
-echo "Copying files... OK"
+tar -zxvf cineasts.tgz -C data/
+mv *.jar plugins/
+echo "Uncompressing: OK"
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
